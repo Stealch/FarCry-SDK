@@ -8,11 +8,11 @@ using System.Text.RegularExpressions;
 using Gibbed.Dunia2.FileFormats;
 using Gibbed.IO;
 using NDesk.Options;
-using Big = Gibbed.Dunia2.FileFormats.Big;
 using EntryDecompression = Gibbed.Dunia2.FileFormats.Big.EntryDecompression;
 using Gibbed.ProjectData;
+using BigFile = Gibbed.Dunia2.FileFormats.BigFile;
 
-namespace FarCrySDK.Library
+namespace FarCry_SDK
 {
     public class ArchiveManager
     {
@@ -24,417 +24,144 @@ namespace FarCrySDK.Library
         private void OnProgress(int percent) => ProgressChanged?.Invoke(this, percent);
         private void OnComplete(bool success) => OperationCompleted?.Invoke(this, success);
 
-        public async Task<bool> UnpackAsync(string fatFilePath, string outputDirectory)
+        // Основной публичный асинхронный метод
+        public async Task<bool> UnpackAsync(string fatFilePath, string outputDirectory, string filterPattern = null, bool isVerbose = false)
         {
-            // Используем Task.Run чтобы не блокировать GUI-поток
             return await Task.Run(() =>
             {
-                try
-                {
-
-
-                    OnProgress(100);
-                    OnLog("[INFO] Распаковка успешно завершена!");
-                    OnComplete(true);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    OnLog($"[ERROR] Критическая ошибка: {ex.Message}");
-                    OnLog($"[ERROR] Подробности: {ex.StackTrace}");
-                    OnComplete(false);
-                    return false;
-                }
+                return Unpack(fatFilePath, outputDirectory, filterPattern, isVerbose);
             });
         }
 
-        private static void Main(string[] args)
+        // Основная логика распаковки (адаптирована из Gibbed.Dunia2.Unpack.Program)
+        private bool Unpack(string fatFilePath, string outputDirectory, string filterPattern, bool verbose)
         {
-            bool showHelp = false;
-            bool extractUnknowns = true;
-            bool extractFiles = true;
-            bool extractSubFats = true;
-            bool unpackSubFats = false;
-            string filterPattern = null;
-            bool overwriteFiles = false;
-            bool verbose = false;
-
-            var options = new OptionSet()
-            {
-                {"o|overwrite", "overwrite existing files", v => overwriteFiles = v != null},
-                {"nf|no-files", "don't extract files", v => extractFiles = v == null},
-                {"nu|no-unknowns", "don't extract unknown files", v => extractUnknowns = v == null},
-                {"ns|no-subfats", "don't extract subfats", v => extractSubFats = v == null},
-                {"us|unpack-subfats", "unpack files from subfats", v => unpackSubFats = v != null},
-                {"f|filter=", "only extract files using pattern", v => filterPattern = v},
-                {"v|verbose", "be verbose", v => verbose = v != null},
-                {"h|help", "show this message and exit", v => showHelp = v != null},
-            };
-
-            List<string> extras;
-
             try
             {
-                extras = options.Parse(args);
-            }
-            catch (OptionException e)
-            {
-                Console.Write("{0}: ", GetExecutableName());
-                Console.WriteLine(e.Message);
-                Console.WriteLine("Try `{0} --help' for more information.", GetExecutableName());
-                return;
-            }
+                OnLog($"[INFO] Загрузка архива: {Path.GetFileName(fatFilePath)}");
 
-            if (extras.Count < 1 || extras.Count > 2 || showHelp == true)
-            {
-                Console.WriteLine("Usage: {0} [OPTIONS]+ input_fat [output_dir]", GetExecutableName());
-                Console.WriteLine();
-                Console.WriteLine("Unpack files from a Big File (FAT/DAT pair).");
-                Console.WriteLine();
-                Console.WriteLine("Options:");
-                options.WriteOptionDescriptions(Console.Out);
-                return;
-            }
-
-            string fatPath = extras[0];
-            string outputPath = extras.Count > 1 ? extras[1] : Path.ChangeExtension(fatPath, null) + "_unpack";
-            string datPath;
-
-            Regex filter = null;
-            if (string.IsNullOrEmpty(filterPattern) == false)
-            {
-                filter = new Regex(filterPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            }
-
-            if (Path.GetExtension(fatPath) == ".dat")
-            {
-                datPath = fatPath;
-                fatPath = Path.ChangeExtension(fatPath, ".fat");
-            }
-            else
-            {
-                datPath = Path.ChangeExtension(fatPath, ".dat");
-            }
-
-            if (verbose == true)
-            {
-                Console.WriteLine("Loading project...");
-            }
-
-            var manager = Gibbed.ProjectData.Manager.Load();
-            if (manager.ActiveProject == null)
-            {
-                Console.WriteLine("Warning: no active project loaded.");
-            }
-
-            if (verbose == true)
-            {
-                Console.WriteLine("Reading FAT...");
-            }
-
-            BigFile fat;
-            using (var input = File.OpenRead(fatPath))
-            {
-                fat = new BigFile();
-                fat.Deserialize(input);
-            }
-
-            var hashes = manager.LoadListsFileNames(fat.Version);
-            var subFatHashes = manager.LoadListsSubFatNames(fat.Version);
-
-            using (var input = File.OpenRead(datPath))
-            {
-                if (extractFiles == true)
+                // Проверка существования файлов
+                string dataFilePath;
+                if (Path.GetExtension(fatFilePath) == ".dat")
                 {
-                    Big.Entry[] entries;
-                    if (extractSubFats == true &&
-                        unpackSubFats == true)
+                    dataFilePath = fatFilePath;
+                    fatFilePath = Path.ChangeExtension(fatFilePath, ".fat");
+                    if (!File.Exists(fatFilePath))
                     {
-                        entries =
-                            fat.Entries.Concat(fat.SubFats.SelectMany(sf => sf.Entries))
-                               .OrderBy(e => e.Offset)
-                               .ToArray();
-                    }
-                    else
-                    {
-                        entries = fat.Entries.OrderBy(e => e.Offset).ToArray();
-                    }
-
-                    if (entries.Length > 0)
-                    {
-                        if (verbose == true)
-                        {
-                            Console.WriteLine("Unpacking files...");
-                        }
-
-                        long current = 0;
-                        long total = entries.Length;
-                        var padding = total.ToString(CultureInfo.InvariantCulture).Length;
-
-                        var duplicates = new Dictionary<ulong, int>();
-
-                        foreach (var entry in entries)
-                        {
-                            current++;
-
-                            if (subFatHashes.Contains(entry.NameHash) == true)
-                            {
-                                continue;
-                            }
-
-                            string entryName;
-                            if (GetEntryName(input, fat, entry, hashes, extractUnknowns, out entryName) == false)
-                            {
-                                continue;
-                            }
-
-                            if (duplicates.ContainsKey(entry.NameHash) == true)
-                            {
-                                var number = duplicates[entry.NameHash]++;
-                                var e = Path.GetExtension(entryName);
-                                var nn =
-                                    Path.ChangeExtension(
-                                        Path.ChangeExtension(entryName, null) + "__DUPLICATE_" +
-                                        number.ToString(CultureInfo.InvariantCulture),
-                                        e);
-                                entryName = Path.Combine("__DUPLICATE", nn);
-                            }
-                            else
-                            {
-                                duplicates[entry.NameHash] = 0;
-                            }
-
-                            if (filter != null &&
-                                filter.IsMatch(entryName) == false)
-                            {
-                                continue;
-                            }
-
-                            var entryPath = Path.Combine(outputPath, entryName);
-                            if (overwriteFiles == false &&
-                                File.Exists(entryPath) == true)
-                            {
-                                continue;
-                            }
-
-                            if (verbose == true)
-                            {
-                                Console.WriteLine("[{0}/{1}] {2}",
-                                                  current.ToString(CultureInfo.InvariantCulture).PadLeft(padding),
-                                                  total,
-                                                  entryName);
-                            }
-
-                            input.Seek(entry.Offset, SeekOrigin.Begin);
-
-                            var entryParent = Path.GetDirectoryName(entryPath);
-                            if (string.IsNullOrEmpty(entryParent) == false)
-                            {
-                                Directory.CreateDirectory(entryParent);
-                            }
-
-                            using (var output = File.Create(entryPath))
-                            {
-                                EntryDecompression.Decompress(entry, input, output);
-                            }
-                        }
+                        OnLog($"[ERROR] Не найден .fat файл: {fatFilePath}");
+                        return false;
                     }
                 }
-
-                if (extractSubFats == true &&
-                    unpackSubFats == false &&
-                    fat.SubFats.Count > 0)
+                else
                 {
-                    if (verbose == true)
-                    {
-                        Console.WriteLine("Unpacking subfats...");
-                    }
-
-                    var subFatsFromFat = fat.SubFats.ToList();
-
-                    long current = 0;
-                    long total = subFatsFromFat.Count;
-                    var padding = total.ToString(CultureInfo.InvariantCulture).Length;
-
-                    foreach (var headerEntry in fat.Entries.Where(e => subFatHashes.Contains(e.NameHash) == true))
-                    {
-                        current++;
-
-                        var subFat = new SubFatFile();
-                        using (var temp = new MemoryStream())
-                        {
-                            EntryDecompression.Decompress(headerEntry, input, temp);
-                            temp.Position = 0;
-                            subFat.Deserialize(temp, fat);
-                        }
-
-                        var matchingSubFats = subFatsFromFat
-                            .Where(sf => subFat.Entries.SequenceEqual(sf.Entries))
-                            .ToArray();
-
-                        if (matchingSubFats.Length == 0)
-                        {
-                            continue;
-                        }
-
-                        if (matchingSubFats.Length > 1)
-                        {
-                            throw new InvalidOperationException();
-                        }
-
-                        var entryName = subFatHashes[headerEntry.NameHash];
-                        entryName = FilterEntryName(entryName);
-
-                        var entryHeaderPath = Path.Combine(outputPath, "__SUBFAT", entryName);
-                        if (overwriteFiles == false &&
-                            File.Exists(entryHeaderPath) == true)
-                        {
-                            continue;
-                        }
-
-                        if (verbose == true)
-                        {
-                            Console.WriteLine("[{0}/{1}] {2}",
-                                              current.ToString(CultureInfo.InvariantCulture).PadLeft(padding),
-                                              total,
-                                              entryName);
-                        }
-
-                        var entryParent = Path.GetDirectoryName(entryHeaderPath);
-                        if (string.IsNullOrEmpty(entryParent) == false)
-                        {
-                            Directory.CreateDirectory(entryParent);
-                        }
-
-                        var entryDataPath = Path.ChangeExtension(entryHeaderPath, ".dat");
-
-                        var rebuiltFat = new BigFile
-                        {
-                            Version = fat.Version,
-                            Platform = fat.Platform,
-                            Unknown74 = fat.Unknown74
-                        };
-
-                        using (var output = File.Create(entryDataPath))
-                        {
-                            var rebuiltEntries = new List<Big.Entry>();
-                            foreach (var entry in subFat.Entries.OrderBy(e => e.Offset))
-                            {
-                                var rebuiltEntry = new Big.Entry
-                                {
-                                    NameHash = entry.NameHash,
-                                    UncompressedSize = entry.UncompressedSize,
-                                    CompressedSize = entry.CompressedSize,
-                                    Offset = output.Position,
-                                    CompressionScheme = entry.CompressionScheme
-                                };
-
-                                input.Seek(entry.Offset, SeekOrigin.Begin);
-                                output.WriteFromStream(input, entry.CompressedSize);
-                                output.Seek(output.Position.Align(16), SeekOrigin.Begin);
-
-                                rebuiltEntries.Add(rebuiltEntry);
-                            }
-                            rebuiltFat.Entries.AddRange(rebuiltEntries.OrderBy(e => e.NameHash));
-                        }
-
-                        using (var output = File.Create(entryHeaderPath))
-                        {
-                            rebuiltFat.Serialize(output);
-                        }
-
-                        foreach (var matchingSubFat in matchingSubFats)
-                        {
-                            subFatsFromFat.Remove(matchingSubFat);
-                        }
-                    }
-
-                    if (subFatsFromFat.Count > 0)
-                    {
-                        Console.WriteLine("Warning: could not identify {0} subfats", subFatsFromFat.Count);
-                    }
+                    dataFilePath = Path.ChangeExtension(fatFilePath, ".dat");
                 }
-            }
-        }
-        private static bool GetEntryName(Stream input,
-                                         BigFile fat,
-                                         Big.Entry entry,
-                                         Gibbed.ProjectData.HashList<ulong> hashes,
-                                         bool extractUnknowns,
-                                         out string entryName)
-        {
-            entryName = hashes[entry.NameHash];
 
-            if (entryName == null)
-            {
-                if (extractUnknowns == false)
+                if (!File.Exists(dataFilePath))
                 {
+                    OnLog($"[ERROR] Не найден .dat файл: {dataFilePath}");
                     return false;
                 }
 
-                string type;
-                string extension;
+                Regex regex = null;
+                if (!string.IsNullOrEmpty(filterPattern))
                 {
-                    var guess = new byte[64];
-                    int read = 0;
+                    regex = new Regex(filterPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                }
 
-                    if (entry.CompressionScheme == Big.CompressionScheme.None)
+                // Загрузка проекта и списков имён
+                if (verbose) OnLog("[INFO] Загрузка проекта...");
+                var manager = Manager.Load();
+                if (manager.ActiveProject == null)
+                {
+                    OnLog("[WARN] Не загружен активный проект.");
+                }
+
+                // Чтение FAT
+                if (verbose) OnLog("[INFO] Чтение FAT...");
+                BigFile bigFile;
+                using (FileStream fileStream = File.OpenRead(fatFilePath))
+                {
+                    bigFile = new BigFile();
+                    bigFile.Deserialize(fileStream);
+                }
+
+                var hashes = manager.LoadListsFileNames(bigFile.Version);
+                var subFatHashes = manager.LoadListsSubFatNames(bigFile.Version);
+
+                // Создание выходной директории
+                Directory.CreateDirectory(outputDirectory);
+
+                // Извлечение файлов
+                using (var dataStream = File.OpenRead(dataFilePath))
+                {
+                    int totalEntries = bigFile.Entries.Count;
+                    OnLog($"[INFO] Найдено записей: {totalEntries}");
+
+                    for (int i = 0; i < totalEntries; i++)
                     {
-                        if (entry.CompressedSize > 0)
+                        var entry = bigFile.Entries[i];
+
+                        // Обновление прогресса
+                        int progress = (i * 100) / totalEntries;
+                        OnProgress(progress);
+
+                        // Получение имени файла
+                        string fileName = hashes[entry.NameHash];
+                        if (string.IsNullOrEmpty(fileName))
                         {
-                            input.Seek(entry.Offset, SeekOrigin.Begin);
-                            read = input.Read(guess, 0, (int)Math.Min(entry.CompressedSize, guess.Length));
+                            fileName = $"__UNKNOWN_{entry.NameHash:X8}";
+                        }
+
+                        // Фильтрация по регулярному выражению
+                        if (regex != null && !regex.IsMatch(fileName))
+                        {
+                            continue;
+                        }
+
+                        string outputPath = Path.Combine(outputDirectory, fileName);
+                        string outputDir = Path.GetDirectoryName(outputPath);
+
+                        if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+                        {
+                            Directory.CreateDirectory(outputDir);
+                        }
+
+                        // Логирование
+                        if (verbose)
+                        {
+                            OnLog($"[EXTRACT] {fileName}");
+                        }
+
+                        // Извлечение данных с использованием оригинального метода (как в Unpack)
+                        dataStream.Position = entry.Offset;
+
+                        // Создаём файл для записи
+                        using (var outputFileStream = File.Create(outputPath))
+                        {
+                            // Ключевой вызов: метод сам разберётся со сжатием и размерами
+                            EntryDecompression.Decompress(entry, dataStream, outputFileStream);
                         }
                     }
-                    else
-                    {
-                        using (var temp = new MemoryStream())
-                        {
-                            EntryDecompression.Decompress(entry, input, temp);
-                            temp.Position = 0;
-                            read = temp.Read(guess, 0, (int)Math.Min(temp.Length, guess.Length));
-                        }
-                    }
 
-                    var tuple = FileExtensions.Detect(guess, Math.Min(guess.Length, read));
-                    type = tuple != null ? tuple.Item1 : "unknown";
-                    extension = tuple != null ? tuple.Item2 : null;
+                    OnProgress(100);
                 }
 
-                entryName = entry.NameHash.ToString(fat.Version >= 9 ? "X16" : "X8");
-
-                if (string.IsNullOrEmpty(extension) == false)
-                {
-                    entryName = Path.ChangeExtension(entryName, "." + extension);
-                }
-
-                if (string.IsNullOrEmpty(type) == false)
-                {
-                    entryName = Path.Combine(type, entryName);
-                }
-
-                entryName = Path.Combine("__UNKNOWN", entryName);
+                OnLog("[INFO] Распаковка успешно завершена!");
+                return true;
             }
-            else
+            catch (Exception ex)
             {
-                entryName = FilterEntryName(entryName);
+                OnLog($"[ERROR] Ошибка распаковки: {ex.Message}");
+                return false;
             }
-
-            return true;
         }
 
-        private static string FilterEntryName(string entryName)
+        // Вспомогательные методы (при необходимости можно добавить из оригинального Program.cs)
+        private static string MakePath(string basePath, string fileName)
         {
-            entryName = entryName.Replace("/", "\\");
-            if (entryName.StartsWith("\\") == true)
-            {
-                entryName = entryName.Substring(1);
-            }
-            return entryName;
-        }
-        private static string GetExecutableName()
-        {
-            return Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            // Реализация из оригинального Program.MakePath
+            return Path.Combine(basePath, fileName.Replace('/', Path.DirectorySeparatorChar));
         }
     }
 }
