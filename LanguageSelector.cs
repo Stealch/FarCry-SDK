@@ -36,6 +36,7 @@ namespace FarCry_SDK
                 // Русский язык
                 form.Text = "Far Cry SDK";
                 form.FileMenuItem.Text = "Файл";
+                form.DataMenuItem.Text = "Данные";
                 form.EditMenuItem.Text = "Правка";
                 form.SearchMenuItem.Text = "Поиск";
                 form.SettingsMenuItem.Text = "Настройки";
@@ -50,6 +51,11 @@ namespace FarCry_SDK
                 form.ExportMenuItem.Text = "Экспорт";
                 form.ProjectMenuItem.Text = "Проект";
                 form.DatabaseMenuItem.Text = "Базу данных";
+
+                //Подменю Данные
+                form.UnpackMenuItem.Text = "Распаковать";
+                form.PackMenuItem.Text = "Запаковать";
+
 
                 // Подменю Правка
                 form.UndoMenuItem.Text = "Отменить (CTRL+Z)";

@@ -41,6 +41,9 @@ namespace FarCry_SDK
         public ToolStripMenuItem HelpMenuItem => helpToolStripMenuItem;
         public ToolStripMenuItem ManualMenuItem => manualToolStripMenuItem;
         public ToolStripMenuItem AboutMenuItem => aboutToolStripMenuItem;
+        public ToolStripMenuItem UnpackMenuItem => unpackToolStripMenuItem;
+        public ToolStripMenuItem PackMenuItem => packToolStripMenuItem;
+        public ToolStripMenuItem DataMenuItem => dataToolStripMenuItem;
 
         public MainForm()
         {
@@ -94,6 +97,16 @@ namespace FarCry_SDK
             string currentLang = LanguageSelector.GetCurrentLanguage();
             russianToolStripMenuItem.Checked = (currentLang == "ru");
             englishToolStripMenuItem.Checked = (currentLang == "en");
+        }
+
+        private void unpackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void packToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
