@@ -88,10 +88,6 @@
     <Compile Include="XmlResourceFile.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FarCry SDK.csproj">
-      <Project>{71d41521-4c41-4424-899b-2c09c75f7ce9}</Project>
-      <Name>FarCry SDK</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Gibbed.IO\Gibbed.IO.csproj">
       <Project>{7faf6a07-b5a7-4cf5-a111-caea00ba6656}</Project>
       <Name>Gibbed.IO</Name>

@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchiveManager.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -85,6 +86,27 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="Lib\Gibbed.Dunia2.FileFormats\Gibbed.Dunia2.FileFormats.csproj">
+      <Project>{936b8d92-3dd5-4cf5-9c87-a36a073e6bc2}</Project>
+      <Name>Gibbed.Dunia2.FileFormats</Name>
+    </ProjectReference>
+    <ProjectReference Include="Lib\Gibbed.FarCry3.FileFormats\Gibbed.FarCry3.FileFormats.csproj">
+      <Project>{05be44a7-da2b-4631-8f6d-ca1c518a07d0}</Project>
+      <Name>Gibbed.FarCry3.FileFormats</Name>
+    </ProjectReference>
+    <ProjectReference Include="Lib\Gibbed.IO\Gibbed.IO.csproj">
+      <Project>{7faf6a07-b5a7-4cf5-a111-caea00ba6656}</Project>
+      <Name>Gibbed.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="Lib\Gibbed.Project.Data\Gibbed.ProjectData.csproj">
+      <Project>{f67485bd-c720-4046-b77c-164a274df14d}</Project>
+      <Name>Gibbed.ProjectData</Name>
+    </ProjectReference>
+    <ProjectReference Include="Lib\NDesk.Options\NDesk.Options.csproj">
+      <Project>{eab338ad-8346-4370-97a3-0896ea8af251}</Project>
+      <Name>NDesk.Options</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
