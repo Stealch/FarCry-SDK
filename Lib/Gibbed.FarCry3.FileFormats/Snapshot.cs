@@ -67,7 +67,7 @@ namespace Gibbed.FarCry3.FileFormats
                         this.Height *
                         this.BytesPerPixel *
                         this.BitsPerComponent) / 8;
-            this.Data = input.ReadBytes(size);
+            this.Data = input.ReadBytes((int)size);
 
             var unknown6 = input.ReadValueU32(endian);
             for (uint i = 0; i < unknown6; i++)

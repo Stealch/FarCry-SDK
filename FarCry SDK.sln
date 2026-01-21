@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gibbed.ProjectData", "Lib\G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.FarCry3.FileFormats", "Lib\Gibbed.FarCry3.FileFormats\Gibbed.FarCry3.FileFormats.csproj", "{05BE44A7-DA2B-4631-8F6D-CA1C518A07D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.Dunia2.FileFormats", "Lib\Gibbed.Dunia2.FileFormats\Gibbed.Dunia2.FileFormats.csproj", "{936B8D92-3DD5-4CF5-9C87-A36A073E6BC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{05BE44A7-DA2B-4631-8F6D-CA1C518A07D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05BE44A7-DA2B-4631-8F6D-CA1C518A07D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05BE44A7-DA2B-4631-8F6D-CA1C518A07D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{936B8D92-3DD5-4CF5-9C87-A36A073E6BC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{936B8D92-3DD5-4CF5-9C87-A36A073E6BC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{936B8D92-3DD5-4CF5-9C87-A36A073E6BC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{936B8D92-3DD5-4CF5-9C87-A36A073E6BC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

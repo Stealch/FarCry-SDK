@@ -36,7 +36,7 @@ namespace Gibbed.FarCry3.FileFormats.CustomMap
             this.Unknown1 = input.ReadString(endian);
 
             var length = input.ReadValueU32(endian);
-            this.Unknown2 = input.ReadBytes(length);
+            this.Unknown2 = input.ReadBytes((int)length);
 
             var unknown3 = input.ReadValueU32(endian);
             for (uint i = 0; i < unknown3; i++)
