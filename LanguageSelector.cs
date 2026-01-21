@@ -21,9 +21,8 @@ namespace FarCry_SDK
         private static void ApplyLanguage()
         {
             // Получаем главную форму
-            var mainForm = Application.OpenForms["MainForm"] as MainForm;
 
-            if (mainForm != null)
+            if (Application.OpenForms["MainForm"] is MainForm mainForm)
             {
                 // Обновляем текст элементов формы
                 UpdateFormText(mainForm);
