@@ -22,7 +22,6 @@
 
 using System.IO;
 using Gibbed.IO;
-using FarCry_SDK;
 
 namespace Gibbed.Dunia2.FileFormats.Big
 {
