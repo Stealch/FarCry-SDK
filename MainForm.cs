@@ -12,10 +12,10 @@ namespace FarCry_SDK
 {
     public partial class MainForm : Form
     {
-        private Color darkBackground = Color.FromArgb(45, 45, 48);
-        private Color darkPanel = Color.FromArgb(63, 63, 70);
-        private Color darkText = Color.FromArgb(241, 241, 241);
-        private Color darkHighlight = Color.FromArgb(0, 122, 204);
+        private readonly Color darkBackground = Color.FromArgb(45, 45, 48);
+        private readonly Color darkPanel = Color.FromArgb(63, 63, 70);
+        private readonly Color darkText = Color.FromArgb(241, 241, 241);
+        private readonly Color darkHighlight = Color.FromArgb(0, 122, 204);
 
         // Свойства для доступа к элементам меню из LanguageSelector
         public ToolStripMenuItem FileMenuItem => fileToolStripMenuItem;
