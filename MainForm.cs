@@ -60,13 +60,7 @@ namespace FarCry_SDK
             // Инициализируем менеджер и подписываемся на события
             _archiveManager = new ArchiveManager();
             _archiveManager.LogMessage += ArchiveManager_LogMessage;
-            _archiveManager.ProgressChanged += (sender, percent) =>
-            {
-                if (progressBar1.InvokeRequired)
-                    progressBar1.Invoke(new Action(() => progressBar1.Value = percent));
-                else
-                    progressBar1.Value = percent;
-            };
+            _archiveManager.ProgressChanged += ArchiveManager_ProgressChanged;
         }
 
         private void ApplyDarkTheme()
@@ -94,10 +88,10 @@ namespace FarCry_SDK
         // Обработчик прогресса от ArchiveManager
         private void ArchiveManager_ProgressChanged(object sender, int percent)
         {
-            // Важно! Обновление UI должно быть в UI-потоке
+            // Используем BeginInvoke для более плавного обновления UI
             if (progressBar1.InvokeRequired)
             {
-                progressBar1.Invoke(new Action(() => progressBar1.Value = percent));
+                progressBar1.BeginInvoke(new Action(() => progressBar1.Value = percent));
             }
             else
             {
