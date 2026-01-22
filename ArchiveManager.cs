@@ -11,6 +11,7 @@ using NDesk.Options;
 using EntryDecompression = Gibbed.Dunia2.FileFormats.Big.EntryDecompression;
 using Gibbed.ProjectData;
 using BigFile = Gibbed.Dunia2.FileFormats.BigFile;
+using System.Threading;
 
 namespace FarCry_SDK
 {
@@ -98,51 +99,63 @@ namespace FarCry_SDK
                     int totalEntries = bigFile.Entries.Count;
                     OnLog($"[INFO] Найдено записей: {totalEntries}");
 
-                    for (int i = 0; i < totalEntries; i++)
+                    // Подсчёт обработанных файлов для прогресса (потокобезопасно)
+                    int processedCount = 0;
+                    object progressLock = new object();
+
+                    // ПАРАЛЛЕЛЬНАЯ ОБРАБОТКА
+                    Parallel.ForEach(bigFile.Entries, new ParallelOptions
                     {
-                        var entry = bigFile.Entries[i];
-
-                        // Обновление прогресса
-                        int progress = (i * 100) / totalEntries;
-                        OnProgress(progress);
-
-                        // Получение имени файла
-                        string fileName = hashes[entry.NameHash];
+                        MaxDegreeOfParallelism = Environment.ProcessorCount // Используем все ядра
+                    },
+                    (entry) =>
+                    {
+                    // Получение имени файла (потокобезопасно - только чтение)
+                    string fileName = hashes[entry.NameHash];
                         if (string.IsNullOrEmpty(fileName))
                         {
                             fileName = $"__UNKNOWN_{entry.NameHash:X8}";
                         }
 
-                        // Фильтрация по регулярному выражению
-                        if (regex != null && !regex.IsMatch(fileName))
+                   // Фильтрация по регулярному выражению
+                   if (regex != null && !regex.IsMatch(fileName))
                         {
-                            continue;
-                        }
+                   // Увеличиваем счётчик, даже если файл пропускаем, для корректного прогресса
+                    System.Threading.Interlocked.Increment(ref processedCount);
+                        return; // Пропускаем этот файл
+                    }
 
                         string outputPath = Path.Combine(outputDirectory, fileName);
                         string outputDir = Path.GetDirectoryName(outputPath);
 
-                        if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+                   // Создание директории (потокобезопасно)
+                    if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
                         {
                             Directory.CreateDirectory(outputDir);
                         }
 
-                        // Логирование
-                        if (verbose)
+                    // Логирование (с синхронизацией)
+                    if (verbose)
                         {
-                            OnLog($"[EXTRACT] {fileName}");
+                            lock (progressLock)
+                            {
+                                OnLog($"[EXTRACT] {fileName}");
+                            }
                         }
 
-                        // Извлечение данных с использованием оригинального метода (как в Unpack)
-                        dataStream.Position = entry.Offset;
-
-                        // Создаём файл для записи
+                    // ВАЖНО: Каждый поток открывает свой FileStream для чтения данных
+                        using (var threadDataStream = File.OpenRead(dataFilePath))
                         using (var outputFileStream = File.Create(outputPath))
                         {
-                            // Ключевой вызов: метод сам разберётся со сжатием и размерами
-                            EntryDecompression.Decompress(entry, dataStream, outputFileStream);
+                            threadDataStream.Position = entry.Offset;
+                            EntryDecompression.Decompress(entry, threadDataStream, outputFileStream);
                         }
-                    }
+
+                    // Обновление прогресса (потокобезопасно)
+                    int newCount = System.Threading.Interlocked.Increment(ref processedCount);
+                        int progress = (newCount * 100) / totalEntries;
+                        OnProgress(progress);
+                    }); // Конец Parallel.ForEach
 
                     OnProgress(100);
                 }

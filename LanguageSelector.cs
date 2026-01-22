@@ -21,7 +21,6 @@ namespace FarCry_SDK
         private static void ApplyLanguage()
         {
             // Получаем главную форму
-
             if (Application.OpenForms["MainForm"] is MainForm mainForm)
             {
                 // Обновляем текст элементов формы
@@ -36,7 +35,7 @@ namespace FarCry_SDK
                 // Русский язык
                 form.Text = "Far Cry SDK";
                 form.FileMenuItem.Text = "Файл";
-                form.DataMenuItem.Text = "Данные";
+                form.DataMenuItem.Text = "Данные"; // <-- Исправлено
                 form.EditMenuItem.Text = "Правка";
                 form.SearchMenuItem.Text = "Поиск";
                 form.SettingsMenuItem.Text = "Настройки";
@@ -55,7 +54,6 @@ namespace FarCry_SDK
                 //Подменю Данные
                 form.UnpackMenuItem.Text = "Распаковать";
                 form.PackMenuItem.Text = "Запаковать";
-
 
                 // Подменю Правка
                 form.UndoMenuItem.Text = "Отменить (CTRL+Z)";
@@ -78,6 +76,7 @@ namespace FarCry_SDK
                 // Английский язык
                 form.Text = "Far Cry SDK";
                 form.FileMenuItem.Text = "File";
+                form.DataMenuItem.Text = "Game Data"; // <-- Исправлено
                 form.EditMenuItem.Text = "Edit";
                 form.SearchMenuItem.Text = "Search";
                 form.SettingsMenuItem.Text = "Settings";
@@ -92,6 +91,10 @@ namespace FarCry_SDK
                 form.ExportMenuItem.Text = "Export";
                 form.ProjectMenuItem.Text = "Project";
                 form.DatabaseMenuItem.Text = "Database";
+
+                // Подменю Game Data
+                form.UnpackMenuItem.Text = "Unpack";   // <-- Добавлено
+                form.PackMenuItem.Text = "Pack";       // <-- Добавлено
 
                 // Подменю Edit
                 form.UndoMenuItem.Text = "Undo (CTRL+Z)";
