@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.Dunia2.FileFormats",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.Dunia2.BinaryObjectInfo", "Lib\Gibbed.Dunia2.BinaryObjectInfo\Gibbed.Dunia2.BinaryObjectInfo.csproj", "{419092A1-B3E8-4619-8BB3-6099505B74F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConverterLib", "Lib\XmlConverterLib\XmlConverterLib.csproj", "{D3047DC0-581C-467E-BFB8-23556713C224}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{419092A1-B3E8-4619-8BB3-6099505B74F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{419092A1-B3E8-4619-8BB3-6099505B74F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{419092A1-B3E8-4619-8BB3-6099505B74F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

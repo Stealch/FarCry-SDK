@@ -79,6 +79,10 @@
       <Project>{047857BA-DAA3-4CA7-AFB8-A1B082B28C6A}</Project>
       <Name>Gibbed.IO</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XmlConverterLib\XmlConverterLib.csproj">
+      <Project>{d3047dc0-581c-467e-bfb8-23556713c224}</Project>
+      <Name>XmlConverterLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

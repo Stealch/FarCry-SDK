@@ -555,7 +555,7 @@ namespace Gibbed.Dunia2.BinaryObjectInfo
                     }
 
                     writer.WriteStartElement("rml");
-                    ConvertXml.Program.WriteNode(writer, rez.Root);
+                    XmlConverterLib.XmlConverter.WriteNode(writer, rez.Root);
                     writer.WriteEndElement();
                     break;
                 }

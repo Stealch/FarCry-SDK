@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34902.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConverterLib", "XmlConverterLib.csproj", "{D3047DC0-581C-467E-BFB8-23556713C224}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3047DC0-581C-467E-BFB8-23556713C224}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1650441C-6D15-448F-9AD7-26FF3E117788}
+	EndGlobalSection
+EndGlobal

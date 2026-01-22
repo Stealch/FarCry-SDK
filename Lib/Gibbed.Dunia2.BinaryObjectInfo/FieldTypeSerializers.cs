@@ -401,7 +401,7 @@ namespace Gibbed.Dunia2.BinaryObjectInfo
                 {
                     var rml = new XmlResourceFile
                     {
-                        Root = ConvertXml.Program.ReadNode(nav.SelectSingleNode("rml/*"))
+                        Root = XmlConverterLib.XmlConverter.ReadNode(nav.SelectSingleNode("rml/*"))
                     };
 
                     using (var temp = new MemoryStream())
